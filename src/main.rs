@@ -1,7 +1,8 @@
 use actix_multipart::form::MultipartForm;
-use actix_web::{web, App, Error, HttpServer};
+use actix_web::{web, App, Error, HttpServer, HttpResponse};
 use log;
 use std::path::PathBuf;
+use std::env;
 
 mod config;
 mod error;
@@ -13,8 +14,15 @@ use storage::{Storage, UploadForm};
 async fn upload(
     form: MultipartForm<UploadForm>,
     storage: web::Data<Storage>,
+    token: web::Data<String>,
 ) -> Result<String, Error> {
     log::info!("Received upload request");
+    
+    // 验证上传 token
+    if form.token.0 != *token.as_ref() {
+        return Err(actix_web::error::ErrorUnauthorized("Invalid token"));
+    }
+
     let result = storage
         .save_file(form)
         .await
@@ -26,6 +34,11 @@ async fn upload(
 async fn main() -> std::io::Result<()> {
     std::env::set_var("RUST_LOG", "debug");
     env_logger::init();
+
+    // 获取上传 token
+    let upload_token = env::var("OSS_RS_UPLOAD_TOKEN")
+        .expect("Environment variable 'OSS_RS_UPLOAD_TOKEN' not set");
+    let upload_token = web::Data::new(upload_token);
 
     let settings: Settings = Settings::new().expect("Failed to load settings");
 
@@ -46,6 +59,7 @@ async fn main() -> std::io::Result<()> {
     HttpServer::new(move || {
         App::new()
             .app_data(storage.clone())
+            .app_data(upload_token.clone())
             .service(web::resource("/upload").route(web::post().to(upload)))
     })
     .bind((settings.server.host, settings.server.port))?

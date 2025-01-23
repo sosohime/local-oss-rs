@@ -1,9 +1,5 @@
 use crate::error::{AppError, AppResult};
-use actix_multipart::form::{
-    tempfile::{TempFile, TempFileConfig},
-    text::Text,
-    MultipartForm,
-};
+use actix_multipart::form::{tempfile::TempFile, text::Text, MultipartForm};
 use flate2;
 use std::fs;
 use std::path::{Path, PathBuf};
@@ -19,6 +15,7 @@ pub struct UploadForm {
     pub file: TempFile,
     pub path: Text<String>,
     pub should_unzip: Text<bool>,
+    pub token: Text<String>,
 }
 
 impl Storage {

@@ -25,11 +25,19 @@ cargo build --release
 修改`config.toml`配置文件:
 
 ```toml
-storage_dir = "./storage"  # 存储目录
+storage_dir = "./storage"  # 存储根目录
 
 [server]
 host = "127.0.0.1"
 port = 8080
+```
+
+配置验证token
+```bash
+# ~/.bash_profile
+# add
+OSS_RS_UPLOAD_TOKEN="your_token"
+# source ~/.bash_profile
 ```
 
 ### 运行
@@ -46,23 +54,27 @@ cargo run --release
 
 ```bash
 curl -X POST http://localhost:8080/upload \
-  -F "file=@/path/to/your/file.txt"
+  -F "file=@/path/to/your/file.txt" \
+  -F "token=your_token"
+
 ```
 
-基础上传
+设置上传目录上传
 
 ```bash
 curl -X POST http://localhost:8080/upload \
   -F "file=@/path/to/your/file.txt" \
-  -F "path=custom/path"
+  -F "path=custom/path" \
+  -F "token=your_token"
 ```
 
-基础上传
+上传并解压缩
 
 ```bash
 curl -X POST http://localhost:8080/upload \
   -F "file=@/path/to/your/archive.zip" \
-  -F "should_unzip=true"
+  -F "should_unzip=true" \
+  -F "token=your_token"
 ```
 
 ## 开发说明
