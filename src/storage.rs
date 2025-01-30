@@ -1,6 +1,7 @@
 use crate::error::{AppError, AppResult};
 use actix_multipart::form::{tempfile::TempFile, text::Text, MultipartForm};
 use flate2;
+use log;
 use std::fs;
 use std::path::{Path, PathBuf};
 use tar;
@@ -28,9 +29,9 @@ impl Storage {
     pub async fn save_file(&self, form: MultipartForm<UploadForm>) -> AppResult<String> {
         let upload = form.into_inner();
 
-        println!("Starting to process upload request");
-        println!("Received path: {}", upload.path.0);
-        println!("Should unzip: {}", upload.should_unzip.0);
+        log::info!("Starting to process upload request");
+        log::info!("Received path: {}", upload.path.0);
+        log::info!("Should unzip: {}", upload.should_unzip.0);
 
         let filename = upload
             .file
@@ -42,7 +43,7 @@ impl Storage {
             format!("{}/{}", upload.path.0.trim().trim_matches('/'), filename)
         };
 
-        println!("Saving to path: {}", filepath_str);
+        log::info!("Saving to path: {}", filepath_str);
         let file_path: PathBuf = PathBuf::from(filepath_str);
         let save_path = self.root_dir.join(&file_path);
 
