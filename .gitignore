@@ -24,7 +24,7 @@ upload.png
 .env
 
 # file uploads
-/tmp
+/storage/*
 
 # todo example database
 todo.db
