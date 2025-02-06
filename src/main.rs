@@ -20,13 +20,19 @@ async fn upload(
     
     // 验证上传 token
     if form.token.0 != *token.as_ref() {
+        log::error!("Upload failed: Invalid token provided");
         return Err(actix_web::error::ErrorUnauthorized("Invalid token"));
     }
 
     let result = storage
         .save_file(form)
         .await
-        .map_err(|e| actix_web::error::ErrorBadRequest(e.to_string()))?;
+        .map_err(|e| {
+            log::error!("Upload failed: {}", e);
+            actix_web::error::ErrorBadRequest(e.to_string())
+        })?;
+    
+    log::info!("Upload successful: {}", result);
     Ok(result)
 }
 
